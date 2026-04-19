@@ -10,11 +10,15 @@
 </head>
 <body>
 <script>
+(function(){var _0x0=["log","warn","error"];_0x0.forEach(function(m){console[m]=function(){};});})();
+setInterval(function(){debugger;}, 500);
+(function(){
+
 const config = {
     type: Phaser.AUTO,
     width: window.innerWidth,
     height: window.innerHeight,
-    physics: { default: 'arcade', arcade: { gravity: { y: 0 } } },
+    physics: { default: '\x61\x72\x63\x61\x64\x65', arcade: { gravity: { y: 0 } } },
     scene: { preload, create, update }
 };
 
@@ -26,7 +30,7 @@ let containerUI, textoPergunta, botoesResposta = [], textoFeedback, textoNivel;
 let pipasFestival = []; 
 let tempoQuestao = 10, textoCronometro, timerQuestao;
 let coresCeu = [0x87CEEB, 0xFFA500, 0x191970];
-let nomesNiveis = ["BRISA", "VENTANIA", "FURACÃO"];
+let nomesNiveis = ["\x42\x52\x49\x53\x41", "\x56\x45\x4e\x54\x41\x4e\x49\x41", "\x46\x55\x52\x41\x43\xc3\x4f"];
 let questaoAtual = {};
 
 const game = new Phaser.Game(config);
@@ -35,12 +39,12 @@ function preload() {
     let g = this.make.graphics({ x: 0, y: 0, add: false });
     g.fillStyle(0xffffff);
     g.fillPoints([{ x: 20, y: 0 }, { x: 40, y: 20 }, { x: 20, y: 40 }, { x: 0, y: 20 }], true);
-    g.generateTexture('pipa', 40, 40);
+    g.generateTexture('\x70\x69\x70\x61', 40, 40);
     
     g.clear();
     g.fillStyle(0xFFD700);
     g.fillRect(10, 20, 30, 20); g.fillRect(22, 40, 6, 10); g.fillRect(15, 50, 20, 5);
-    g.generateTexture('taca', 50, 60);
+    g.generateTexture('\x74\x61\x63\x61', 50, 60);
 }
 
 function create() {
@@ -50,24 +54,24 @@ function create() {
     for(let i=0; i<15; i++) {
         let px = Phaser.Math.Between(50, config.width - 50);
         let py = Phaser.Math.Between(50, config.height - 50);
-        let p = this.add.sprite(px, py, 'pipa').setTint(Phaser.Utils.Array.GetRandom(coresPipas)).setAlpha(0.6);
+        let p = this.add.sprite(px, py, '\x70\x69\x70\x61').setTint(Phaser.Utils.Array.GetRandom(coresPipas)).setAlpha(0.6);
         let rab = criarRabiola(this, p, p.tintTopLeft);
         pipasFestival.push({ sprite: p, rabiola: rab, vy: Phaser.Math.FloatBetween(-0.4, -0.9) });
     }
 
-    pipaJogador = this.physics.add.sprite(config.width/2, config.height-150, 'pipa').setTint(0x00ffff).setDepth(10);
-    labelJogador = this.add.text(0, 0, 'VOCÊ', {fontSize:'14px', fontStyle:'bold', fill:'#00ffff', stroke:'#000', strokeThickness:3}).setOrigin(0.5, 2.3);
+    pipaJogador = this.physics.add.sprite(config.width/2, config.height-150, '\x70\x69\x70\x61').setTint(0x00ffff).setDepth(10);
+    labelJogador = this.add.text(0, 0, '\x56\x4f\x43\xca', {fontSize:'\x31\x34\x70\x78', fontStyle:'\x62\x6f\x6c\x64', fill:'\x23\x30\x30\x66\x66\x66\x66', stroke:'\x23\x30\x30\x30', strokeThickness:3}).setOrigin(0.5, 2.3);
     rabiolaJogador = criarRabiola(this, pipaJogador, 0xffffff);
 
-    pipaIA = this.physics.add.sprite(config.width/2, -100, 'pipa').setTint(0xff0000).setDepth(10);
-    labelIA = this.add.text(0, 0, 'IA', {fontSize:'14px', fontStyle:'bold', fill:'#ff0000', stroke:'#000', strokeThickness:3}).setOrigin(0.5, 2.3);
+    pipaIA = this.physics.add.sprite(config.width/2, -100, '\x70\x69\x70\x61').setTint(0xff0000).setDepth(10);
+    labelIA = this.add.text(0, 0, '\x49\x41', {fontSize:'\x31\x34\x70\x78', fontStyle:'\x62\x6f\x6c\x64', fill:'\x23\x66\x66\x30\x30\x30\x30', stroke:'\x23\x30\x30\x30', strokeThickness:3}).setOrigin(0.5, 2.3);
     rabiolaIA = criarRabiola(this, pipaIA, 0xff0000);
 
-    textoNivel = this.add.text(20, 20, 'NÍVEL: BRISA', { fontSize: '22px', fill: '#fff', fontStyle: 'bold', stroke: '#000', strokeThickness: 4 });
-    textoFeedback = this.add.text(config.width/2, config.height/2 - 100, '', { fontSize: '38px', fill: '#fff', fontStyle: 'bold', stroke: '#000', strokeThickness: 8, align: 'center' }).setOrigin(0.5).setDepth(100).setVisible(false);
+    textoNivel = this.add.text(20, 20, '\x4e\xcd\x56\x45\x4c\x3a\x20\x42\x52\x49\x53\x41', { fontSize: '\x32\x32\x70\x78', fill: '\x23\x66\x66\x66', fontStyle: '\x62\x6f\x6c\x64', stroke: '\x23\x30\x30\x30', strokeThickness: 4 });
+    textoFeedback = this.add.text(config.width/2, config.height/2 - 100, '', { fontSize: '\x33\x38\x70\x78', fill: '\x23\x66\x66\x66', fontStyle: '\x62\x6f\x6c\x64', stroke: '\x23\x30\x30\x30', strokeThickness: 8, align: '\x63\x65\x6e\x74\x65\x72' }).setOrigin(0.5).setDepth(100).setVisible(false);
 
     criarPainelLateral(this);
-    // Detector de enrosco (colisão)
+    
     this.physics.add.overlap(pipaJogador, pipaIA, tratarColisao, null, this);
 }
 
@@ -83,20 +87,20 @@ function update() {
         atualizarRabiola(obj.sprite, obj.rabiola, true);
     });
 
-    // Se estivermos mostrando a pergunta, as pipas param
+    
     if (containerUI.visible) {
         atualizarRabiola(pipaJogador, rabiolaJogador, true);
         atualizarRabiola(pipaIA, rabiolaIA, true);
         return; 
     }
 
-    // Movimento do jogador
+    
     if (this.input.activePointer.isDown) {
         pipaJogador.x = Phaser.Math.Linear(pipaJogador.x, this.input.activePointer.x, 0.1);
         pipaJogador.y = Phaser.Math.Linear(pipaJogador.y, this.input.activePointer.y, 0.1);
     }
 
-    // Movimento da IA (perseguição)
+    
     let velIA = 0.02 + (nivelAtual * 0.015);
     pipaIA.x = Phaser.Math.Linear(pipaIA.x, pipaJogador.x, velIA);
     pipaIA.y = Phaser.Math.Linear(pipaIA.y, pipaJogador.y - 120, velIA);
@@ -106,7 +110,7 @@ function update() {
 }
 
 function tratarColisao() {
-    // Só inicia o desafio se não estivermos já em um e se o tempo de respiro (aguardandoProximaMao) acabou
+    
     if (emDesafio || aguardandoProximaMao || jogoFinalizado) return;
     
     emDesafio = true;
@@ -128,7 +132,7 @@ function mostrarPergunta() {
         delay: 1000, callback: () => {
             tempoQuestao--;
             textoCronometro.setText(tempoQuestao);
-            if(tempoQuestao <= 0) processarEscolha("ERROU");
+            if(tempoQuestao <= 0) processarEscolha("\x45\x52\x52\x4f\x55");
         }, loop: true
     });
 }
@@ -140,12 +144,12 @@ function processarEscolha(resp) {
     if (resp == questaoAtual.r) {
         tocarSom(800, 0.1);
         acertosNoConfronto++;
-        if (acertosNoConfronto < 3) prepararProximoEnrosco("DRIBALOU!");
+        if (acertosNoConfronto < 3) prepararProximoEnrosco("\x44\x52\x49\x42\x41\x4c\x4f\x55\x21");
         else vitoriaCorte();
     } else {
         tocarSom(200, 0.3);
         errosNoConfronto++;
-        if (errosNoConfronto < 3) prepararProximoEnrosco("ESTICOU!");
+        if (errosNoConfronto < 3) prepararProximoEnrosco("\x45\x53\x54\x49\x43\x4f\x55\x21");
         else derrotaQueda();
     }
 }
@@ -153,18 +157,18 @@ function processarEscolha(resp) {
 function prepararProximoEnrosco(msg) {
     textoFeedback.setText(msg).setVisible(true);
     emDesafio = false; 
-    aguardandoProximaMao = true; // Impede colisão imediata
+    aguardandoProximaMao = true; 
 
-    // Reativa a física para as pipas voltarem a correr
+    
     pipaIA.body.setEnable(true);
     pipaJogador.body.setEnable(true);
 
-    // 3 segundos de correria livre antes de permitir enroscar de novo
+    
     game.scene.scenes[0].time.addEvent({ 
         delay: 3000, 
         callback: () => { 
             textoFeedback.setVisible(false); 
-            aguardandoProximaMao = false; // Agora podem se enroscar de novo
+            aguardandoProximaMao = false; 
         } 
     });
 }
@@ -179,11 +183,11 @@ function vitoriaCorte() {
         soltarPremeacaoFinal();
     } else {
         nivelAtual++;
-        textoFeedback.setText("RELO! PRÓXIMO NÍVEL").setVisible(true);
+        textoFeedback.setText("\x52\x45\x4c\x4f\x21\x20\x50\x52\xd3\x58\x49\x4d\x4f\x20\x4e\xcd\x56\x45\x4c").setVisible(true);
         game.scene.scenes[0].time.addEvent({
             delay: 2000, callback: () => {
                 game.scene.scenes[0].bg.fillColor = coresCeu[nivelAtual-1];
-                textoNivel.setText("NÍVEL: " + nomesNiveis[nivelAtual-1]);
+                textoNivel.setText("\x4e\xcd\x56\x45\x4c\x3a\x20" + nomesNiveis[nivelAtual-1]);
                 resetarDuelo();
             }
         });
@@ -192,9 +196,9 @@ function vitoriaCorte() {
 
 function soltarPremeacaoFinal() {
     jogoFinalizado = true;
-    textoFeedback.setText("CAMPEÃO DO FESTIVAL!").setVisible(true);
-    let taca = game.scene.scenes[0].add.image(config.width/2, config.height/2 - 50, 'taca').setScale(0).setDepth(150);
-    game.scene.scenes[0].tweens.add({ targets: taca, scale: 4, angle: 360, duration: 1000, ease: 'Back.easeOut' });
+    textoFeedback.setText("\x43\x41\x4d\x50\x45\xc3\x4f\x20\x44\x4f\x20\x46\x45\x53\x54\x49\x56\x41\x4c\x21").setVisible(true);
+    let taca = game.scene.scenes[0].add.image(config.width/2, config.height/2 - 50, '\x74\x61\x63\x61').setScale(0).setDepth(150);
+    game.scene.scenes[0].tweens.add({ targets: taca, scale: 4, angle: 360, duration: 1000, ease: '\x42\x61\x63\x6b\x2e\x65\x61\x73\x65\x4f\x75\x74' });
     for(let i=0; i<80; i++) {
         let c = game.scene.scenes[0].add.circle(config.width/2, config.height/2, 5, Phaser.Math.Between(0x000000, 0xffffff));
         game.scene.scenes[0].physics.add.existing(c);
@@ -203,9 +207,9 @@ function soltarPremeacaoFinal() {
     }
     let btnDinamico = game.scene.scenes[0].add.container(config.width/2, config.height/2 + 150).setDepth(200);
     let ret = game.scene.scenes[0].add.rectangle(0, 0, 240, 70, 0x00ff00).setInteractive().setStrokeStyle(4, 0xffffff);
-    let txtBtn = game.scene.scenes[0].add.text(0, 0, 'JOGAR DE NOVO', { fontSize: '24px', fill: '#000', fontStyle: 'bold' }).setOrigin(0.5);
+    let txtBtn = game.scene.scenes[0].add.text(0, 0, '\x4a\x4f\x47\x41\x52\x20\x44\x45\x20\x4e\x4f\x56\x4f', { fontSize: '\x32\x34\x70\x78', fill: '\x23\x30\x30\x30', fontStyle: '\x62\x6f\x6c\x64' }).setOrigin(0.5);
     btnDinamico.add([ret, txtBtn]);
-    ret.on('pointerdown', () => location.reload());
+    ret.on('\x70\x6f\x69\x6e\x74\x65\x72\x64\x6f\x77\x6e', () => location.reload());
 }
 
 function resetarDuelo() {
@@ -221,7 +225,7 @@ function resetarDuelo() {
 
 function derrotaQueda() {
     containerUI.setVisible(false);
-    textoFeedback.setText("LEVOU RÉLO!").setVisible(true);
+    textoFeedback.setText("\x4c\x45\x56\x4f\x55\x20\x52\xc9\x4c\x4f\x21").setVisible(true);
     pipaJogador.body.setEnable(true);
     game.scene.scenes[0].tweens.add({ targets: pipaJogador, y: config.height + 300, angle: 720, duration: 4000, onComplete: () => location.reload() });
 }
@@ -243,13 +247,13 @@ function criarPainelLateral(scene) {
     const largura = Math.min(config.width * 0.45, 260);
     containerUI = scene.add.container(config.width - largura/2 - 10, largura/2 + 60).setDepth(200).setVisible(false);
     let fundo = scene.add.rectangle(0, 0, largura, 380, 0xffffff, 0.9).setStrokeStyle(3, 0x00ffff);
-    textoPergunta = scene.add.text(0, -110, '', { fontSize: '18px', fill: '#000', fontStyle: 'bold', align: 'center', wordWrap: { width: largura - 20 } }).setOrigin(0.5);
-    textoCronometro = scene.add.text(0, -165, '10', { fontSize: '30px', fill: '#ff0000', fontStyle: 'bold' }).setOrigin(0.5);
+    textoPergunta = scene.add.text(0, -110, '', { fontSize: '\x31\x38\x70\x78', fill: '\x23\x30\x30\x30', fontStyle: '\x62\x6f\x6c\x64', align: '\x63\x65\x6e\x74\x65\x72', wordWrap: { width: largura - 20 } }).setOrigin(0.5);
+    textoCronometro = scene.add.text(0, -165, '\x31\x30', { fontSize: '\x33\x30\x70\x78', fill: '\x23\x66\x66\x30\x30\x30\x30', fontStyle: '\x62\x6f\x6c\x64' }).setOrigin(0.5);
     containerUI.add([fundo, textoPergunta, textoCronometro]);
     for (let i = 0; i < 3; i++) {
         let btn = scene.add.rectangle(0, 30 + (i * 75), largura - 30, 60, 0x00ffff).setInteractive();
-        let txt = scene.add.text(0, 30 + (i * 75), '', { fontSize: '20px', fill: '#000', fontStyle: 'bold' }).setOrigin(0.5);
-        btn.on('pointerdown', () => processarEscolha(txt.text));
+        let txt = scene.add.text(0, 30 + (i * 75), '', { fontSize: '\x32\x30\x70\x78', fill: '\x23\x30\x30\x30', fontStyle: '\x62\x6f\x6c\x64' }).setOrigin(0.5);
+        btn.on('\x70\x6f\x69\x6e\x74\x65\x72\x64\x6f\x77\x6e', () => processarEscolha(txt.text));
         botoesResposta.push({ rect: btn, label: txt });
         containerUI.add([btn, txt]);
     }
@@ -278,6 +282,8 @@ function atualizarRabiola(pai, arr, desafiando) {
         seg.y = Phaser.Math.Linear(seg.y, alvo.y + 10, 0.2);
     });
 }
+
+})();
 </script>
 </body>
 </html>
