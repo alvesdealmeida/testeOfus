@@ -1,565 +1,283 @@
 ﻿<!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Caça-Palavras Educativo</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --mat:    #FF6B35;
-    --port:   #4ECDC4;
-    --cien:   #45B7D1;
-    --geo:    #96CEB4;
-    --hist:   #FFEAA7;
-    --found:  #2ecc71;
-    --bg:     #1a1a2e;
-    --card:   #16213e;
-    --card2:  #0f3460;
-    --text:   #e0e0ff;
-    --accent: #e94560;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Nunito', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* BLOQUEIO DESKTOP / PC */
-  @media (min-width: 1025px) {
-    body::after {
-      content: "⚠️ Este jogo foi otimizado para Celulares e Tablets. Por favor, acesse via dispositivo móvel ou reduza a largura do seu navegador.";
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px;
-      text-align: center;
-      font-size: 1.5rem;
-      font-family: 'Fredoka One', cursive;
-    }
-  }
-
-  /* Stars background */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: 
-      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.3) 0%, transparent 100%),
-      radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,.25) 0%, transparent 100%),
-      radial-gradient(1px 1px at 50% 80%, rgba(255,255,255,.2) 0%, transparent 100%),
-      radial-gradient(1px 1px at 10% 60%, rgba(255,255,255,.3) 0%, transparent 100%),
-      radial-gradient(2px 2px at 35% 15%, rgba(255,255,255,.15) 0%, transparent 100%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 10px;
-  }
-
-  header {
-    text-align: center;
-    padding: 15px 0 10px;
-  }
-  header h1 {
-    font-family: 'Fredoka One', cursive;
-    font-size: clamp(1.5rem, 8vw, 2.5rem);
-    background: linear-gradient(135deg, var(--mat), var(--port), var(--cien), var(--geo));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  header p { color: #aab; font-size: 0.8rem; margin-top: 5px;}
-
-  .cat-bar {
-    display: flex;
-    overflow-x: auto;
-    gap: 8px;
-    padding: 10px 5px;
-    margin-bottom: 10px;
-    scrollbar-width: none;
-  }
-  .cat-bar::-webkit-scrollbar { display: none; }
-
-  .cat-btn {
-    font-family: 'Fredoka One', cursive;
-    border: none;
-    border-radius: 50px;
-    padding: 8px 15px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    white-space: nowrap;
-    color: #1a1a2e;
-    font-weight: 700;
-  }
-  .cat-btn.active { outline: 3px solid #fff; transform: scale(1.05); }
-  .cat-btn[data-cat="matematica"]   { background: var(--mat); }
-  .cat-btn[data-cat="portugues"]    { background: var(--port); }
-  .cat-btn[data-cat="ciencias"]     { background: var(--cien); }
-  .cat-btn[data-cat="geografia"]    { background: var(--geo); }
-  .cat-btn[data-cat="historia"]     { background: var(--hist); }
-
-  .game-area {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .grid-wrap {
-    background: var(--card);
-    border-radius: 15px;
-    padding: 10px;
-    box-shadow: 0 8px 32px rgba(0,0,0,.5);
-    border: 1px solid rgba(255,255,255,.06);
-  }
-  
-  #wordGrid {
-    display: grid;
-    gap: 2px;
-    user-select: none;
-    touch-action: none;
-  }
-
-  .cell {
-    width: 100%;
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Fredoka One', cursive;
-    font-size: clamp(0.7rem, 4vw, 1.2rem);
-    border-radius: 4px;
-    background: rgba(255,255,255,0.04);
-    text-transform: uppercase;
-  }
-  .cell.selected { background: rgba(255,255,255,0.3); transform: scale(1.1); }
-  .cell.found { color: #1a1a2e !important; }
-
-  .sidebar {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .timer-bar {
-    grid-column: span 2;
-    background: var(--card2);
-    border-radius: 15px;
-    padding: 10px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    border: 2px solid var(--accent);
-  }
-  .timer-val { font-size: 1.8rem; font-family: 'Fredoka One'; color: var(--accent); }
-  .timer-val.warning { animation: shake 0.2s infinite; color: #ff0000; }
-
-  @keyframes shake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(2px); }
-    75% { transform: translateX(-2px); }
-  }
-
-  .words-panel, .hint-panel {
-    background: var(--card);
-    border-radius: 15px;
-    padding: 12px;
-    font-size: 0.8rem;
-  }
-
-  .controls {
-    grid-column: span 2;
-    display: flex;
-    gap: 10px;
-  }
-  .btn {
-    flex: 1;
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
-    font-family: 'Fredoka One';
-    cursor: pointer;
-  }
-  .btn-new { background: var(--accent); color: white; }
-  .btn-hint { background: var(--card2); color: white; }
-
-  .overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.9);
-    z-index: 1000;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 20px;
-  }
-  .overlay.show { display: flex; }
-  .win-card { background: var(--card); padding: 30px; border-radius: 20px; border: 2px solid gold; }
-
-  /* Créditos do Autor */
-  .footer-credit {
-    text-align: center;
-    padding: 20px 0;
-    font-family: 'Fredoka One', cursive;
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.3);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; touch-action: none; }
+    </style>
 </head>
 <body>
-
-<div class="container">
-  <header>
-    <h1>🔤 Caça-Palavras Educativo</h1>
-    <p style="color: var(--port); font-weight: 700; letter-spacing: 1px;">By Sebastiao Alves de Almeida</p>
-  </header>
-
-  <div class="cat-bar" id="catBar"></div>
-  
-  <div class="game-area">
-    <div class="grid-wrap">
-      <div id="wordGrid"></div>
-      <div class="progress-wrap" style="height: 6px; background: #333; margin-top:10px; border-radius:3px;">
-        <div id="progress" style="width:0%; height:100%; background: var(--found); transition: 0.3s;"></div>
-      </div>
-    </div>
-
-    <div class="sidebar">
-      <div class="timer-bar">
-        <span class="timer-label">⏳ TEMPO:</span>
-        <span class="timer-val" id="timerVal">01:30</span>
-      </div>
-      
-      <div class="words-panel">
-        <ul class="word-list" id="wordList" style="list-style:none"></ul>
-      </div>
-
-      <div class="hint-panel">
-        <p id="hintText">Encontre as palavras!</p>
-      </div>
-
-      <div class="controls">
-        <button class="btn btn-new" onclick="newGame()">🔄 NOVO JOGO</button>
-        <button class="btn btn-hint" onclick="showHint()">💡 DICA</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="overlay" id="overlay">
-  <div class="win-card" id="winCard">
-    <span style="font-size: 5rem;" id="winIcon">🏆</span>
-    <h2 id="winTitle" style="font-family: 'Fredoka One'; margin: 15px 0;">VITÓRIA!</h2>
-    <p id="winMsg" style="margin-bottom: 20px;"></p>
-    <button class="btn btn-new" onclick="closeOverlay(); newGame();">PRÓXIMO NÍVEL</button>
-  </div>
-</div>
-
 <script>
-(function(){var _0x0=["log","warn","error"];_0x0.forEach(function(m){console[m]=function(){};});})();
-setInterval(function(){debugger;}, 500);
-(function(){
+const config = {
+    type: Phaser.AUTO,
+    width: window.innerWidth,
+    height: window.innerHeight,
+    physics: { default: 'arcade', arcade: { gravity: { y: 0 } } },
+    scene: { preload, create, update }
+};
 
+let pipaJogador, pipaIA, rabiolaJogador, rabiolaIA;
+let labelJogador, labelIA;
+let nivelAtual = 1, emDesafio = false, aguardandoProximaMao = false;
+let acertosNoConfronto = 0, errosNoConfronto = 0, jogoFinalizado = false;
+let containerUI, textoPergunta, botoesResposta = [], textoFeedback, textoNivel;
+let pipasFestival = []; 
+let tempoQuestao = 10, textoCronometro, timerQuestao;
+let coresCeu = [0x87CEEB, 0xFFA500, 0x191970];
+let nomesNiveis = ["BRISA", "VENTANIA", "FURACÃO"];
+let questaoAtual = {};
 
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playSound(type) {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    if (type === '\x67\x61\x69\x6e') {
-        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.2);
-    } else if (type === '\x6c\x6f\x73\x65') {
-        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-    } else if (type === '\x77\x69\x6e') {
-        [523, 659, 783].forEach((f, i) => {
-            const o = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            o.frequency.value = f; o.connect(g); g.connect(audioCtx.destination);
-            g.gain.setValueAtTime(0.05, audioCtx.currentTime + i*0.1);
-            o.start(audioCtx.currentTime + i*0.1); o.stop(audioCtx.currentTime + i*0.1 + 0.4);
+const game = new Phaser.Game(config);
+
+function preload() {
+    let g = this.make.graphics({ x: 0, y: 0, add: false });
+    g.fillStyle(0xffffff);
+    g.fillPoints([{ x: 20, y: 0 }, { x: 40, y: 20 }, { x: 20, y: 40 }, { x: 0, y: 20 }], true);
+    g.generateTexture('pipa', 40, 40);
+    
+    g.clear();
+    g.fillStyle(0xFFD700);
+    g.fillRect(10, 20, 30, 20); g.fillRect(22, 40, 6, 10); g.fillRect(15, 50, 20, 5);
+    g.generateTexture('taca', 50, 60);
+}
+
+function create() {
+    this.bg = this.add.rectangle(0, 0, config.width, config.height, coresCeu[0]).setOrigin(0);
+
+    const coresPipas = [0x32CD32, 0xBA55D3, 0xFF69B4, 0xFFA500, 0xADFF2F, 0x00FF7F];
+    for(let i=0; i<15; i++) {
+        let px = Phaser.Math.Between(50, config.width - 50);
+        let py = Phaser.Math.Between(50, config.height - 50);
+        let p = this.add.sprite(px, py, 'pipa').setTint(Phaser.Utils.Array.GetRandom(coresPipas)).setAlpha(0.6);
+        let rab = criarRabiola(this, p, p.tintTopLeft);
+        pipasFestival.push({ sprite: p, rabiola: rab, vy: Phaser.Math.FloatBetween(-0.4, -0.9) });
+    }
+
+    pipaJogador = this.physics.add.sprite(config.width/2, config.height-150, 'pipa').setTint(0x00ffff).setDepth(10);
+    labelJogador = this.add.text(0, 0, 'VOCÊ', {fontSize:'14px', fontStyle:'bold', fill:'#00ffff', stroke:'#000', strokeThickness:3}).setOrigin(0.5, 2.3);
+    rabiolaJogador = criarRabiola(this, pipaJogador, 0xffffff);
+
+    pipaIA = this.physics.add.sprite(config.width/2, -100, 'pipa').setTint(0xff0000).setDepth(10);
+    labelIA = this.add.text(0, 0, 'IA', {fontSize:'14px', fontStyle:'bold', fill:'#ff0000', stroke:'#000', strokeThickness:3}).setOrigin(0.5, 2.3);
+    rabiolaIA = criarRabiola(this, pipaIA, 0xff0000);
+
+    textoNivel = this.add.text(20, 20, 'NÍVEL: BRISA', { fontSize: '22px', fill: '#fff', fontStyle: 'bold', stroke: '#000', strokeThickness: 4 });
+    textoFeedback = this.add.text(config.width/2, config.height/2 - 100, '', { fontSize: '38px', fill: '#fff', fontStyle: 'bold', stroke: '#000', strokeThickness: 8, align: 'center' }).setOrigin(0.5).setDepth(100).setVisible(false);
+
+    criarPainelLateral(this);
+    // Detector de enrosco (colisão)
+    this.physics.add.overlap(pipaJogador, pipaIA, tratarColisao, null, this);
+}
+
+function update() {
+    if (jogoFinalizado) return;
+
+    labelJogador.setPosition(pipaJogador.x, pipaJogador.y);
+    labelIA.setPosition(pipaIA.x, pipaIA.y);
+
+    pipasFestival.forEach(obj => {
+        obj.sprite.y += obj.vy;
+        if(obj.sprite.y < -60) obj.sprite.y = config.height + 60;
+        atualizarRabiola(obj.sprite, obj.rabiola, true);
+    });
+
+    // Se estivermos mostrando a pergunta, as pipas param
+    if (containerUI.visible) {
+        atualizarRabiola(pipaJogador, rabiolaJogador, true);
+        atualizarRabiola(pipaIA, rabiolaIA, true);
+        return; 
+    }
+
+    // Movimento do jogador
+    if (this.input.activePointer.isDown) {
+        pipaJogador.x = Phaser.Math.Linear(pipaJogador.x, this.input.activePointer.x, 0.1);
+        pipaJogador.y = Phaser.Math.Linear(pipaJogador.y, this.input.activePointer.y, 0.1);
+    }
+
+    // Movimento da IA (perseguição)
+    let velIA = 0.02 + (nivelAtual * 0.015);
+    pipaIA.x = Phaser.Math.Linear(pipaIA.x, pipaJogador.x, velIA);
+    pipaIA.y = Phaser.Math.Linear(pipaIA.y, pipaJogador.y - 120, velIA);
+
+    atualizarRabiola(pipaJogador, rabiolaJogador, false);
+    atualizarRabiola(pipaIA, rabiolaIA, false);
+}
+
+function tratarColisao() {
+    // Só inicia o desafio se não estivermos já em um e se o tempo de respiro (aguardandoProximaMao) acabou
+    if (emDesafio || aguardandoProximaMao || jogoFinalizado) return;
+    
+    emDesafio = true;
+    pipaIA.body.setEnable(false);
+    pipaJogador.body.setEnable(false);
+    mostrarPergunta();
+}
+
+function mostrarPergunta() {
+    questaoAtual = gerarQuestao(nivelAtual);
+    tempoQuestao = 10;
+    textoPergunta.setText(questaoAtual.p);
+    botoesResposta.forEach((btn, i) => btn.label.setText(questaoAtual.op[i]));
+    
+    containerUI.setVisible(true);
+    
+    if(timerQuestao) timerQuestao.remove();
+    timerQuestao = game.scene.scenes[0].time.addEvent({
+        delay: 1000, callback: () => {
+            tempoQuestao--;
+            textoCronometro.setText(tempoQuestao);
+            if(tempoQuestao <= 0) processarEscolha("ERROU");
+        }, loop: true
+    });
+}
+
+function processarEscolha(resp) {
+    if(timerQuestao) timerQuestao.remove();
+    containerUI.setVisible(false);
+
+    if (resp == questaoAtual.r) {
+        tocarSom(800, 0.1);
+        acertosNoConfronto++;
+        if (acertosNoConfronto < 3) prepararProximoEnrosco("DRIBALOU!");
+        else vitoriaCorte();
+    } else {
+        tocarSom(200, 0.3);
+        errosNoConfronto++;
+        if (errosNoConfronto < 3) prepararProximoEnrosco("ESTICOU!");
+        else derrotaQueda();
+    }
+}
+
+function prepararProximoEnrosco(msg) {
+    textoFeedback.setText(msg).setVisible(true);
+    emDesafio = false; 
+    aguardandoProximaMao = true; // Impede colisão imediata
+
+    // Reativa a física para as pipas voltarem a correr
+    pipaIA.body.setEnable(true);
+    pipaJogador.body.setEnable(true);
+
+    // 3 segundos de correria livre antes de permitir enroscar de novo
+    game.scene.scenes[0].time.addEvent({ 
+        delay: 3000, 
+        callback: () => { 
+            textoFeedback.setVisible(false); 
+            aguardandoProximaMao = false; // Agora podem se enroscar de novo
+        } 
+    });
+}
+
+function vitoriaCorte() {
+    tocarSom(1000, 0.5);
+    pipaIA.body.setEnable(true);
+    pipaIA.setAngularVelocity(1000);
+    game.scene.scenes[0].physics.moveTo(pipaIA, pipaIA.x, config.height + 500, 400);
+
+    if (nivelAtual === 3) {
+        soltarPremeacaoFinal();
+    } else {
+        nivelAtual++;
+        textoFeedback.setText("RELO! PRÓXIMO NÍVEL").setVisible(true);
+        game.scene.scenes[0].time.addEvent({
+            delay: 2000, callback: () => {
+                game.scene.scenes[0].bg.fillColor = coresCeu[nivelAtual-1];
+                textoNivel.setText("NÍVEL: " + nomesNiveis[nivelAtual-1]);
+                resetarDuelo();
+            }
         });
     }
 }
 
-
-const CATEGORIES = {
-  matematica: { label: '\x2795\x20\x4d\x61\x74', color: '\x23\x46\x46\x36\x42\x33\x35', words: [
-    { w: '\x54\x52\x49\x41\x4e\x47\x55\x4c\x4f', hint: '\x33\x20\x6c\x61\x64\x6f\x73\x20\x65\x20\x33\x20\xe2\x6e\x67\x75\x6c\x6f\x73\x2e' }, { w: '\x46\x52\x41\x43\x41\x4f', hint: '\x50\x61\x72\x74\x65\x20\x64\x65\x20\x75\x6d\x20\x74\x6f\x64\x6f\x2e' },
-    { w: '\x4e\x55\x4d\x45\x52\x4f', hint: '\x53\xed\x6d\x62\x6f\x6c\x6f\x20\x70\x61\x72\x61\x20\x63\x6f\x6e\x74\x61\x72\x2e' }, { w: '\x53\x4f\x4d\x41', hint: '\x41\x64\x69\xe7\xe3\x6f\x2e' },
-    { w: '\x44\x49\x56\x49\x53\x41\x4f', hint: '\x52\x65\x70\x61\x72\x74\x69\x72\x20\x65\x6d\x20\x70\x61\x72\x74\x65\x73\x2e' }, { w: '\x51\x55\x41\x44\x52\x41\x44\x4f', hint: '\x34\x20\x6c\x61\x64\x6f\x73\x20\x69\x67\x75\x61\x69\x73\x2e' },
-    { w: '\x53\x55\x42\x54\x52\x41\x43\x41\x4f', hint: '\x4f\x70\x65\x72\x61\xe7\xe3\x6f\x20\x64\x65\x20\x6d\x65\x6e\x6f\x73\x2e' }, { w: '\x4d\x55\x4c\x54\x49\x50\x4c\x49\x43\x41\x43\x41\x4f', hint: '\x56\x65\x7a\x65\x73\x2e' },
-    { w: '\x41\x4e\x47\x55\x4c\x4f', hint: '\x45\x6e\x63\x6f\x6e\x74\x72\x6f\x20\x64\x65\x20\x64\x75\x61\x73\x20\x72\x65\x74\x61\x73\x2e' }, { w: '\x41\x4c\x47\x45\x42\x52\x41', hint: '\x4c\x65\x74\x72\x61\x73\x20\x65\x20\x6e\xfa\x6d\x65\x72\x6f\x73\x2e' },
-    { w: '\x47\x45\x4f\x4d\x45\x54\x52\x49\x41', hint: '\x45\x73\x74\x75\x64\x6f\x20\x64\x61\x73\x20\x66\x6f\x72\x6d\x61\x73\x2e' }, { w: '\x4c\x4f\x47\x49\x43\x41', hint: '\x52\x61\x63\x69\x6f\x63\xed\x6e\x69\x6f\x20\x63\x6f\x72\x72\x65\x74\x6f\x2e' },
-    { w: '\x43\x41\x4c\x43\x55\x4c\x4f', hint: '\x41\x74\x6f\x20\x64\x65\x20\x63\x6f\x6d\x70\x75\x74\x61\x72\x2e' }, { w: '\x43\x49\x4c\x49\x4e\x44\x52\x4f', hint: '\x46\x6f\x72\x6d\x61\x20\x64\x65\x20\x6c\x61\x74\x61\x2e' },
-    { w: '\x4c\x4f\x53\x41\x4e\x47\x4f', hint: '\x46\x6f\x72\x6d\x61\x20\x64\x6f\x20\x62\x61\x6c\xe3\x6f\x2e' }, { w: '\x54\x41\x42\x55\x41\x44\x41', hint: '\x54\x61\x62\x65\x6c\x61\x20\x64\x65\x20\x63\xe1\x6c\x63\x75\x6c\x6f\x2e' }
-  ]},
-  portugues: { label: '\xd83d\xdcd6\x20\x50\x6f\x72\x74', color: '\x23\x34\x45\x43\x44\x43\x34', words: [
-    { w: '\x56\x45\x52\x42\x4f', hint: '\x49\x6e\x64\x69\x63\x61\x20\x61\xe7\xe3\x6f\x2e' }, { w: '\x53\x49\x4c\x41\x42\x41', hint: '\x55\x6e\x69\x64\x61\x64\x65\x20\x73\x6f\x6e\x6f\x72\x61\x2e' },
-    { w: '\x50\x4f\x45\x4d\x41', hint: '\x54\x65\x78\x74\x6f\x20\x65\x6d\x20\x76\x65\x72\x73\x6f\x73\x2e' }, { w: '\x4c\x45\x54\x52\x41', hint: '\x53\xed\x6d\x62\x6f\x6c\x6f\x20\x64\x6f\x20\x73\x6f\x6d\x2e' },
-    { w: '\x43\x4f\x4e\x54\x4f', hint: '\x4e\x61\x72\x72\x61\x74\x69\x76\x61\x20\x63\x75\x72\x74\x61\x2e' }, { w: '\x56\x4f\x47\x41\x4c', hint: '\x41\x2c\x20\x45\x2c\x20\x49\x2c\x20\x4f\x2c\x20\x55\x2e' },
-    { w: '\x41\x44\x4a\x45\x54\x49\x56\x4f', hint: '\x44\xe1\x20\x71\x75\x61\x6c\x69\x64\x61\x64\x65\x2e' }, { w: '\x53\x55\x4a\x45\x49\x54\x4f', hint: '\x51\x75\x65\x6d\x20\x66\x61\x7a\x20\x61\x20\x61\xe7\xe3\x6f\x2e' },
-    { w: '\x52\x49\x4d\x41', hint: '\x53\x6f\x6e\x73\x20\x69\x67\x75\x61\x69\x73\x20\x6e\x6f\x20\x66\x69\x6e\x61\x6c\x2e' }, { w: '\x46\x52\x41\x53\x45', hint: '\x53\x65\x6e\x74\x69\x64\x6f\x20\x63\x6f\x6d\x70\x6c\x65\x74\x6f\x2e' },
-    { w: '\x53\x49\x4e\x54\x41\x58\x45', hint: '\x4f\x72\x64\x65\x6d\x20\x64\x61\x73\x20\x70\x61\x6c\x61\x76\x72\x61\x73\x2e' }, { w: '\x4d\x45\x54\x41\x46\x4f\x52\x41', hint: '\x43\x6f\x6d\x70\x61\x72\x61\xe7\xe3\x6f\x20\x69\x6d\x70\x6c\xed\x63\x69\x74\x61\x2e' },
-    { w: '\x52\x45\x44\x41\x43\x41\x4f', hint: '\x45\x73\x63\x72\x65\x76\x65\x72\x20\x75\x6d\x20\x74\x65\x78\x74\x6f\x2e' }, { w: '\x44\x49\x54\x4f\x4e\x47\x4f', hint: '\x44\x75\x61\x73\x20\x76\x6f\x67\x61\x69\x73\x20\x6a\x75\x6e\x74\x61\x73\x2e' },
-    { w: '\x50\x52\x4f\x53\x4f\x50\x39f\x50\x45\x49\x41', hint: '\x48\x75\x6d\x61\x6e\x69\x7a\x61\x72\x20\x6f\x62\x6a\x65\x74\x6f\x73\x2e' }, { w: '\x47\x52\x41\x4d\x41\x54\x49\x43\x41', hint: '\x52\x65\x67\x72\x61\x73\x20\x64\x61\x20\x6c\xed\x6e\x67\x75\x61\x2e' }
-  ]},
-  ciencias: { label: '\xd83d\xdd2c\x20\x43\x69\x65\x6e', color: '\x23\x34\x35\x42\x37\x44\x31', words: [
-    { w: '\x43\x45\x4c\x55\x4c\x41', hint: '\x55\x6e\x69\x64\x61\x64\x65\x20\x64\x61\x20\x76\x69\x64\x61\x2e' }, { w: '\x4f\x58\x49\x47\x45\x4e\x49\x4f', hint: '\x47\xe1\x73\x20\x76\x69\x74\x61\x6c\x2e' },
-    { w: '\x45\x4e\x45\x52\x47\x49\x41', hint: '\x43\x61\x70\x61\x63\x69\x64\x61\x64\x65\x20\x64\x65\x20\x74\x72\x61\x62\x61\x6c\x68\x6f\x2e' }, { w: '\x41\x54\x4f\x4d\x4f', hint: '\x4d\x65\x6e\x6f\x72\x20\x70\x61\x72\x74\xed\x63\x75\x6c\x61\x2e' },
-    { w: '\x50\x4c\x41\x4e\x45\x54\x41', hint: '\x43\x6f\x72\x70\x6f\x20\x71\x75\x65\x20\x6f\x72\x62\x69\x74\x61\x20\x6f\x20\x53\x6f\x6c\x2e' }, { w: '\x53\x41\x4e\x47\x55\x45', hint: '\x4c\xed\x71\x75\x69\x64\x6f\x20\x64\x61\x20\x76\x69\x64\x61\x2e' },
-    { w: '\x45\x53\x50\x45\x43\x49\x45', hint: '\x47\x72\x75\x70\x6f\x20\x64\x65\x20\x73\x65\x72\x65\x73\x20\x69\x67\x75\x61\x69\x73\x2e' }, { w: '\x46\x4f\x53\x53\x49\x4c', hint: '\x52\x65\x73\x74\x6f\x20\x61\x6e\x74\x69\x67\x6f\x2e' },
-    { w: '\x47\x45\x4e\x45\x54\x49\x43\x41', hint: '\x45\x73\x74\x75\x64\x6f\x20\x64\x6f\x20\x44\x4e\x41\x2e' }, { w: '\x49\x4e\x56\x45\x52\x54\x45\x42\x52\x41\x44\x4f', hint: '\x53\x65\x6d\x20\x6f\x73\x73\x6f\x73\x2e' },
-    { w: '\x4d\x41\x4d\x49\x46\x45\x52\x4f', hint: '\x4d\x61\x6d\x61\x72\x20\x71\x75\x61\x6e\x64\x6f\x20\x62\x65\x62\xea\x2e' }, { w: '\x52\x45\x41\x43\x41\x4f', hint: '\x4d\x75\x64\x61\x6e\xe7\x61\x20\x71\x75\xed\x6d\x69\x63\x61\x2e' },
-    { w: '\x53\x4f\x4c\x56\x45\x4e\x54\x45', hint: '\x44\x69\x73\x73\x6f\x6c\x76\x65\x20\x73\x75\x62\x73\x74\xe2\x6e\x63\x69\x61\x73\x2e' }, { w: '\x56\x41\x43\x49\x4e\x41', hint: '\x50\x72\x6f\x74\x65\xe7\xe3\x6f\x20\x63\x6f\x6e\x74\x72\x61\x20\x76\xed\x72\x75\x73\x2e' }
-  ]},
-  geografia: { label: '\xd83c\xdf0d\x20\x47\x65\x6f', color: '\x23\x39\x36\x43\x45\x42\x34', words: [
-    { w: '\x4f\x43\x45\x41\x4e\x4f', hint: '\xc1\x67\x75\x61\x20\x73\x61\x6c\x67\x61\x64\x61\x2e' }, { w: '\x4d\x41\x50\x41', hint: '\x44\x65\x73\x65\x6e\x68\x6f\x20\x64\x61\x20\x74\x65\x72\x72\x61\x2e' },
-    { w: '\x43\x4c\x49\x4d\x41', hint: '\x54\x65\x6d\x70\x6f\x20\x64\x61\x20\x72\x65\x67\x69\xe3\x6f\x2e' }, { w: '\x53\x45\x52\x52\x41', hint: '\x4d\x6f\x6e\x74\x61\x6e\x68\x61\x73\x2e' },
-    { w: '\x43\x41\x50\x49\x54\x41\x4c', hint: '\x43\x69\x64\x61\x64\x65\x20\x70\x72\x69\x6e\x63\x69\x70\x61\x6c\x2e' }, { w: '\x45\x53\x54\x41\x44\x4f', hint: '\x44\x69\x76\x69\x73\xe3\x6f\x20\x64\x6f\x20\x70\x61\xed\x73\x2e' },
-    { w: '\x52\x45\x4c\x45\x56\x4f', hint: '\x46\x6f\x72\x6d\x61\x73\x20\x64\x61\x20\x74\x65\x72\x72\x61\x2e' }, { w: '\x44\x45\x53\x45\x52\x54\x4f', hint: '\x4c\x75\x67\x61\x72\x20\x6d\x75\x69\x74\x6f\x20\x73\x65\x63\x6f\x2e' },
-    { w: '\x46\x4c\x4f\x52\x45\x53\x54\x41', hint: '\x4d\x75\x69\x74\x61\x73\x20\xe1\x72\x76\x6f\x72\x65\x73\x2e' }, { w: '\x46\x52\x4f\x4e\x54\x45\x49\x52\x41', hint: '\x4c\x69\x6d\x69\x74\x65\x20\x65\x6e\x74\x72\x65\x20\x70\x61\xed\x73\x65\x73\x2e' },
-    { w: '\x4d\x49\x47\x52\x41\xc7\xc3\x4f', hint: '\x4d\x75\x64\x61\x72\x20\x64\x65\x20\x6c\x75\x67\x61\x72\x2e' }, { w: '\x50\x45\x43\x55\x41\x52\x49\x41', hint: '\x43\x72\x69\x61\xe7\xe3\x6f\x20\x64\x65\x20\x67\x61\x64\x6f\x2e' },
-    { w: '\x52\x4f\x43\x48\x41', hint: '\x50\x65\x64\x72\x61\x20\x6e\x61\x74\x75\x72\x61\x6c\x2e' }, { w: '\x54\x55\x52\x49\x53\x4d\x4f', hint: '\x56\x69\x61\x6a\x61\x72\x20\x61\x20\x6c\x61\x7a\x65\x72\x2e' }
-  ]},
-  historia: { label: '\xd83c\xdfdb\xfe0f\x20\x48\x69\x73\x74', color: '\x23\x46\x46\x45\x41\x41\x37', words: [
-    { w: '\x46\x41\x52\x41\x4f\x53', hint: '\x52\x65\x69\x73\x20\x64\x6f\x20\x45\x67\x69\x74\x6f\x2e' }, { w: '\x43\x4f\x4c\x4f\x4e\x49\x41', hint: '\x54\x65\x72\x72\x69\x74\xf3\x72\x69\x6f\x20\x64\x6f\x6d\x69\x6e\x61\x64\x6f\x2e' },
-    { w: '\x50\x49\x52\x41\x4d\x49\x44\x45', hint: '\x54\xfa\x6d\x75\x6c\x6f\x20\x65\x67\xed\x70\x63\x69\x6f\x2e' }, { w: '\x44\x45\x4d\x4f\x43\x52\x41\x43\x49\x41', hint: '\x47\x6f\x76\x65\x72\x6e\x6f\x20\x64\x6f\x20\x70\x6f\x76\x6f\x2e' },
-    { w: '\x47\x55\x45\x52\x52\x41', hint: '\x43\x6f\x6e\x66\x6c\x69\x74\x6f\x20\x61\x72\x6d\x61\x64\x6f\x2e' }, { w: '\x52\x45\x50\x55\x42\x4c\x49\x43\x41', hint: '\x43\x6f\x69\x73\x61\x20\x70\xfa\x62\x6c\x69\x63\x61\x2e' },
-    { w: '\x49\x4d\x50\x45\x52\x49\x4f', hint: '\x54\x65\x72\x72\x69\x74\xf3\x72\x69\x6f\x20\x64\x65\x20\x75\x6d\x20\x69\x6d\x70\x65\x72\x61\x64\x6f\x72\x2e' }, { w: '\x45\x53\x43\x52\x41\x56\x41\x4f', hint: '\x54\x72\x61\x62\x61\x6c\x68\x6f\x20\x66\x6f\x72\xe7\x61\x64\x6f\x2e' },
-    { w: '\x4d\x4f\x4e\x41\x52\x51\x55\x49\x41', hint: '\x52\x65\x69\x20\x6f\x75\x20\x72\x61\x69\x6e\x68\x61\x2e' }, { w: '\x52\x45\x56\x4f\x4c\x55\xc7\xc3\x4f', hint: '\x4d\x75\x64\x61\x6e\xe7\x61\x20\x72\x61\x64\x69\x63\x61\x6c\x2e' },
-    { w: '\x4e\x41\x56\x45\x47\x41\x43\x41\x4f', hint: '\x56\x69\x61\x67\x65\x6e\x73\x20\x70\x65\x6c\x6f\x20\x6d\x61\x72\x2e' }, { w: '\x4d\x55\x53\x45\x55', hint: '\x47\x75\x61\x72\x64\x61\x20\x6f\x20\x70\x61\x73\x73\x61\x64\x6f\x2e' },
-    { w: '\x54\x52\x41\x44\x49\x43\x41\x4f', hint: '\x50\x61\x73\x73\x61\x64\x6f\x20\x64\x65\x20\x70\x61\x69\x73\x20\x70\x61\x72\x61\x20\x66\x69\x6c\x68\x6f\x73\x2e' }
-  ]}
-};
-
-let currentCat = '\x6d\x61\x74\x65\x6d\x61\x74\x69\x63\x61';
-let gridLetters = [];
-let gridSize = 10;
-let placedWords = [];
-let foundWords = new Set();
-let selecting = false;
-let selStart = null;
-let selCells = [];
-let timerInterval = null;
-let timeLeft = 90;
-
-function init() {
-  buildCatBar();
-  selectCat('\x6d\x61\x74\x65\x6d\x61\x74\x69\x63\x61');
-  newGame();
-}
-
-function buildCatBar() {
-  const bar = document.getElementById('\x63\x61\x74\x42\x61\x72');
-  Object.entries(CATEGORIES).forEach(([key, cat]) => {
-    const btn = document.createElement('\x62\x75\x74\x74\x6f\x6e');
-    btn.className = '\x63\x61\x74\x2d\x62\x74\x6e';
-    btn.dataset.cat = key;
-    btn.textContent = cat.label;
-    btn.onclick = () => { selectCat(key); newGame(); };
-    bar.appendChild(btn);
-  });
-}
-
-function selectCat(key) {
-  currentCat = key;
-  document.querySelectorAll('\x2e\x63\x61\x74\x2d\x62\x74\x6e').forEach(b => b.classList.toggle('\x61\x63\x74\x69\x76\x65', b.dataset.cat === key));
-}
-
-function newGame() {
-  foundWords.clear();
-  clearInterval(timerInterval);
-  timeLeft = 90;
-  updateTimerDisplay();
-  
-  const catData = CATEGORIES[currentCat];
-  
-  const wordObjs = shuffle([...catData.words]).slice(0, 5);
-  
-  gridLetters = Array.from({length: gridSize}, () => Array(gridSize).fill(''));
-  placedWords = [];
-  wordObjs.forEach(wo => placeWord(wo.w.toUpperCase(), wo.hint));
-
-  const alpha = '\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f\x50\x52\x53\x54\x55\x56\x5a';
-  for (let r = 0; r < gridSize; r++)
-    for (let c = 0; c < gridSize; c++)
-      if (!gridLetters[r][c]) gridLetters[r][c] = alpha[Math.floor(Math.random() * alpha.length)];
-
-  renderGrid();
-  renderWordList();
-  updateScore();
-
-  timerInterval = setInterval(() => {
-    timeLeft--;
-    updateTimerDisplay();
-    if (timeLeft <= 10) playSound('\x6c\x6f\x73\x65');
-    if (timeLeft <= 0) gameOver();
-  }, 1000);
-}
-
-function updateTimerDisplay() {
-  const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
-  const el = document.getElementById('\x74\x69\x6d\x65\x72\x56\x61\x6c');
-  el.textContent = `${m}:${s.toString().padStart(2,'\x30')}`;
-  el.classList.toggle('\x77\x61\x72\x6e\x69\x6e\x67', timeLeft <= 15);
-}
-
-function placeWord(word, hint) {
-  const dirs = [[0,1],[1,0],[1,1],[0,-1],[-1,0]];
-  for (const [dr, dc] of shuffle(dirs)) {
-    for (let attempt = 0; attempt < 50; attempt++) {
-      const sr = Math.floor(Math.random() * gridSize), sc = Math.floor(Math.random() * gridSize);
-      let ok = true, cells = [];
-      for (let i = 0; i < word.length; i++) {
-        const r = sr + dr * i, c = sc + dc * i;
-        if (r<0||r>=gridSize||c<0||c>=gridSize||(gridLetters[r][c]&&gridLetters[r][c]!==word[i])) {ok=false; break;}
-        cells.push([r, c]);
-      }
-      if (ok) {
-        cells.forEach(([r, c], i) => gridLetters[r][c] = word[i]);
-        placedWords.push({ word, hint, cells });
-        return;
-      }
+function soltarPremeacaoFinal() {
+    jogoFinalizado = true;
+    textoFeedback.setText("CAMPEÃO DO FESTIVAL!").setVisible(true);
+    let taca = game.scene.scenes[0].add.image(config.width/2, config.height/2 - 50, 'taca').setScale(0).setDepth(150);
+    game.scene.scenes[0].tweens.add({ targets: taca, scale: 4, angle: 360, duration: 1000, ease: 'Back.easeOut' });
+    for(let i=0; i<80; i++) {
+        let c = game.scene.scenes[0].add.circle(config.width/2, config.height/2, 5, Phaser.Math.Between(0x000000, 0xffffff));
+        game.scene.scenes[0].physics.add.existing(c);
+        c.body.setVelocity(Phaser.Math.Between(-400, 400), Phaser.Math.Between(-700, -200));
+        c.body.setGravityY(400);
     }
-  }
+    let btnDinamico = game.scene.scenes[0].add.container(config.width/2, config.height/2 + 150).setDepth(200);
+    let ret = game.scene.scenes[0].add.rectangle(0, 0, 240, 70, 0x00ff00).setInteractive().setStrokeStyle(4, 0xffffff);
+    let txtBtn = game.scene.scenes[0].add.text(0, 0, 'JOGAR DE NOVO', { fontSize: '24px', fill: '#000', fontStyle: 'bold' }).setOrigin(0.5);
+    btnDinamico.add([ret, txtBtn]);
+    ret.on('pointerdown', () => location.reload());
 }
 
-function renderGrid() {
-  const grid = document.getElementById('\x77\x6f\x72\x64\x47\x72\x69\x64');
-  grid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
-  grid.innerHTML = '';
-  for (let r = 0; r < gridSize; r++) {
-    for (let c = 0; c < gridSize; c++) {
-      const cell = document.createElement('\x64\x69\x76');
-      cell.className = '\x63\x65\x6c\x6c';
-      cell.textContent = gridLetters[r][c];
-      cell.dataset.r = r; cell.dataset.c = c;
-      cell.onmousedown = startSelect; cell.onmouseover = moveSelect; cell.onmouseup = endSelect;
-      cell.ontouchstart = e => { startSelect(e.touches[0]); };
-      cell.ontouchmove = e => { 
-        const t = e.touches[0]; 
-        moveSelect({target: document.elementFromPoint(t.clientX, t.clientY)}); 
-      };
-      cell.ontouchend = endSelect;
-      grid.appendChild(cell);
+function resetarDuelo() {
+    textoFeedback.setVisible(false);
+    emDesafio = false;
+    aguardandoProximaMao = false;
+    acertosNoConfronto = 0;
+    errosNoConfronto = 0;
+    pipaJogador.body.setEnable(true);
+    pipaIA.setPosition(Phaser.Math.Between(100, config.width-100), -150);
+    pipaIA.setAngularVelocity(0).setAngle(0);
+}
+
+function derrotaQueda() {
+    containerUI.setVisible(false);
+    textoFeedback.setText("LEVOU RÉLO!").setVisible(true);
+    pipaJogador.body.setEnable(true);
+    game.scene.scenes[0].tweens.add({ targets: pipaJogador, y: config.height + 300, angle: 720, duration: 4000, onComplete: () => location.reload() });
+}
+
+function tocarSom(freq, dur) {
+    try {
+        let ctx = new (window.AudioContext || window.webkitAudioContext)();
+        let osc = ctx.createOscillator();
+        let gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + dur);
+        osc.start(); osc.stop(ctx.currentTime + dur);
+    } catch(e){}
+}
+
+function criarPainelLateral(scene) {
+    const largura = Math.min(config.width * 0.45, 260);
+    containerUI = scene.add.container(config.width - largura/2 - 10, largura/2 + 60).setDepth(200).setVisible(false);
+    let fundo = scene.add.rectangle(0, 0, largura, 380, 0xffffff, 0.9).setStrokeStyle(3, 0x00ffff);
+    textoPergunta = scene.add.text(0, -110, '', { fontSize: '18px', fill: '#000', fontStyle: 'bold', align: 'center', wordWrap: { width: largura - 20 } }).setOrigin(0.5);
+    textoCronometro = scene.add.text(0, -165, '10', { fontSize: '30px', fill: '#ff0000', fontStyle: 'bold' }).setOrigin(0.5);
+    containerUI.add([fundo, textoPergunta, textoCronometro]);
+    for (let i = 0; i < 3; i++) {
+        let btn = scene.add.rectangle(0, 30 + (i * 75), largura - 30, 60, 0x00ffff).setInteractive();
+        let txt = scene.add.text(0, 30 + (i * 75), '', { fontSize: '20px', fill: '#000', fontStyle: 'bold' }).setOrigin(0.5);
+        btn.on('pointerdown', () => processarEscolha(txt.text));
+        botoesResposta.push({ rect: btn, label: txt });
+        containerUI.add([btn, txt]);
     }
-  }
 }
 
-function startSelect(e) { 
-    selecting = true; 
-    const c = cellAt(e.target || e); 
-    if(c) { selStart = c; selCells = [c]; highlight(); }
-}
-function moveSelect(e) { 
-    if (!selecting) return; 
-    const cur = cellAt(e.target || e); 
-    if(cur) { selCells = getCellsBetween(selStart, cur); highlight(); }
-}
-function endSelect() { 
-    if (!selecting) return; 
-    selecting = false; 
-    checkWord(); 
-    document.querySelectorAll('\x2e\x63\x65\x6c\x6c').forEach(c => c.classList.remove('\x73\x65\x6c\x65\x63\x74\x65\x64'));
+function gerarQuestao(n) {
+    let a, b, r, txt;
+    if(n === 1) { a = Phaser.Math.Between(5, 15); b = Phaser.Math.Between(1, 10); r = a + b; txt = `RESOLVA:\n${a} + ${b}`; }
+    else if(n === 2) { a = Phaser.Math.Between(20, 50); b = Phaser.Math.Between(10, 20); r = a - b; txt = `CALCULE:\n${a} - ${b}`; }
+    else { a = Phaser.Math.Between(3, 9); b = Phaser.Math.Between(3, 7); r = a * b; txt = `TABUADA:\n${a} x ${b}`; }
+    let ops = [r, r + 3, r - 2].sort(() => Math.random() - 0.5);
+    return { p: txt, r: r, op: ops };
 }
 
-function checkWord() {
-  const selected = selCells.map(({r, c}) => gridLetters[r][c]).join('');
-  const pw = placedWords.find(p => (p.word === selected || p.word === selected.split('').reverse().join('')) && !foundWords.has(p.word));
-  if (pw) {
-    foundWords.add(pw.word);
-    pw.cells.forEach(([r, c]) => {
-      const el = document.querySelector(`[data-r="\x24\x7b\x72\x7d"][data-c="\x24\x7b\x63\x7d"]`);
-      el.classList.add('\x66\x6f\x75\x6e\x64');
-      el.style.background = CATEGORIES[currentCat].color;
+function criarRabiola(scene, pai, cor) {
+    let arr = [];
+    for(let i=0; i<10; i++) arr.push(scene.add.circle(0,0,4,cor).setAlpha(0.5));
+    return arr;
+}
+
+function atualizarRabiola(pai, arr, desafiando) {
+    arr.forEach((seg, i) => {
+        let alvo = (i === 0) ? pai : arr[i-1];
+        let vento = desafiando ? Math.sin(Date.now()/200 + i) * 12 : Math.sin(Date.now()/500 + i) * 5;
+        seg.x = Phaser.Math.Linear(seg.x, alvo.x + vento, 0.2);
+        seg.y = Phaser.Math.Linear(seg.y, alvo.y + 10, 0.2);
     });
-    document.getElementById('\x77\x6f\x72\x64\x2d'+pw.word).style.textDecoration = '\x6c\x69\x6e\x65\x2d\x74\x68\x72\x6f\x75\x67\x68';
-    document.getElementById('\x77\x6f\x72\x64\x2d'+pw.word).style.opacity = '\x30\x2e\x35';
-    playSound('\x67\x61\x69\x6e');
-    updateScore();
-    if (foundWords.size === placedWords.length) winLevel();
-  }
 }
-
-function winLevel() {
-    clearInterval(timerInterval);
-    playSound('\x77\x69\x6e');
-    showOverlay('\xd83c\xdfc6\x20\x56\x49\x54\xd3\x52\x49\x41\x21', `Nível concluído com sucesso!`);
-}
-
-function gameOver() {
-    clearInterval(timerInterval);
-    playSound('\x6c\x6f\x73\x65');
-    showOverlay('\x23f0\x20\x46\x49\x4d\x20\x44\x45\x20\x54\x45\x4d\x50\x4f', '\x54\x65\x6e\x74\x65\x20\x6e\x6f\x76\x61\x6d\x65\x6e\x74\x65\x21');
-}
-
-function showOverlay(title, msg) {
-    document.getElementById('\x77\x69\x6e\x54\x69\x74\x6c\x65').textContent = title;
-    document.getElementById('\x77\x69\x6e\x4d\x73\x67').textContent = msg;
-    document.getElementById('\x6f\x76\x65\x72\x6c\x61\x79').classList.add('\x73\x68\x6f\x77');
-}
-
-function closeOverlay() { document.getElementById('\x6f\x76\x65\x72\x6c\x61\x79').classList.remove('\x73\x68\x6f\x77'); }
-
-function renderWordList() {
-  const list = document.getElementById('\x77\x6f\x72\x64\x4c\x69\x73\x74');
-  list.innerHTML = '';
-  placedWords.forEach(pw => {
-    const li = document.createElement('\x6c\x69');
-    li.id = '\x77\x6f\x72\x64\x2d' + pw.word;
-    li.textContent = '\x25cb\x20' + pw.word;
-    list.appendChild(li);
-  });
-}
-
-function updateScore() {
-  const pct = (foundWords.size / placedWords.length) * 100;
-  document.getElementById('\x70\x72\x6f\x67\x72\x65\x73\x73').style.width = pct + '\x25';
-}
-
-function showHint() {
-    const rem = placedWords.filter(p => !foundWords.has(p.word));
-    if(rem.length) document.getElementById('\x68\x69\x6e\x74\x54\x65\x78\x74').innerHTML = `<strong>DICA:</strong> ${rem[0].hint}`;
-}
-
-function cellAt(el) { return (el && el.dataset && el.dataset.r !== undefined) ? {r:+el.dataset.r, c:+el.dataset.c} : null; }
-function highlight() {
-  document.querySelectorAll('\x2e\x63\x65\x6c\x6c').forEach(c => c.classList.remove('\x73\x65\x6c\x65\x63\x74\x65\x64'));
-  selCells.forEach(({r, c}) => document.querySelector(`[data-r="\x24\x7b\x72\x7d"][data-c="\x24\x7b\x63\x7d"]`)?.classList.add('\x73\x65\x6c\x65\x63\x74\x65\x64'));
-}
-function getCellsBetween(a, b) {
-  const dr = b.r - a.r, dc = b.c - a.c, len = Math.max(Math.abs(dr), Math.abs(dc));
-  if (len === 0) return [a];
-  if (Math.abs(dr) !== 0 && Math.abs(dc) !== 0 && Math.abs(dr) !== Math.abs(dc)) return [a];
-  const sr = Math.sign(dr), sc = Math.sign(dc);
-  return Array.from({length: len + 1}, (_, i) => ({r: a.r + sr*i, c: a.c + sc*i}));
-}
-function shuffle(a) { return a.sort(() => Math.random() - 0.5); }
-
-init();
-
-})();
 </script>
 </body>
 </html>
